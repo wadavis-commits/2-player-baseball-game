@@ -1503,7 +1503,7 @@ def banner(title: str, subtitle: str = "", color: str = GREEN, text_color: str =
     Returns:
         Div: Drafter Div component containing the banner.
     """
-    parts: list[Component] = [Header(title, 1, style_color=text_color, style_margin="0")]
+    parts: list[Header | Div] = [Header(title, 1, style_color=text_color, style_margin="0")]
     if subtitle:
         parts.append(Div(subtitle, style_color=text_color, style_margin_top="4px"))
     return Div(*parts, style_background_color=color, style_padding="16px 22px",
