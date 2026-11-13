@@ -6,14 +6,13 @@ Advanced Techniques Documentation (per course requirements for code outside basi
     Used to dynamically initialize mutable list structures in State.
   - SVG Generation & Data URIs (`urllib.parse.quote`): 
     Used in `diamond_image` to dynamically construct and render vector graphics on the fly.
-  - Bakery Testing Suite (`from bakery import assert_equal`): 
+  - Unit testing with `assert_equal` (provided by Drafter through `from drafter import *`): 
     Explicit `assert_equal` statements are placed after all function definitions.
 """
 import random
 from dataclasses import dataclass, field
 from urllib.parse import quote
-from bakery import assert_equal
-from drafter import *
+from drafter import *  # also provides assert_equal for the unit tests at the bottom
 
 # ---------------------------------------------------------------------------
 # Site-wide look (colors, buttons, text boxes)
@@ -2386,15 +2385,18 @@ assert_equal(_roe_state.bases[0], 0)
 
 _roip_state = new_game("A", "B", 2)
 resolve_out_in_play(_roip_state)
-assert_equal(_roip_state.outs, 1)
+# Random result: either the batter is out, or a fielder erred and the batter reached first.
+assert_equal(_roip_state.outs == 1 or _roip_state.bases[0] == 0, True)
 
 _rgb_state = new_game("A", "B", 2)
 resolve_ground_ball(_rgb_state, "SS")
-assert_equal(_rgb_state.outs, 1)
+# Random result: either the batter is out, or a fielder erred and the batter reached first.
+assert_equal(_rgb_state.outs == 1 or _rgb_state.bases[0] == 0, True)
 
 _rfb_state = new_game("A", "B", 2)
 resolve_fly_ball(_rfb_state, "LF")
-assert_equal(_rfb_state.outs, 1)
+# Random result: either the batter is out, or a fielder erred and the batter reached first.
+assert_equal(_rfb_state.outs == 1 or _rfb_state.bases[0] == 0, True)
 
 assert_equal(runner_id_of([_test_hitter], _test_hitter), 0)
 
@@ -2512,4 +2514,3 @@ assert_equal(type(play_again(_test_state)), Page)
 
 if __name__ == "__main__":
     start_server(State())
-
