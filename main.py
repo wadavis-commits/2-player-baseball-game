@@ -1827,10 +1827,13 @@ def lineup_setup(state: State) -> Page:
     ]
     names = [state.away_name, state.home_name]
     for team_number, team in enumerate(state.teams):
-        rows: list[list[Component | str | int | float | bool]] = [
-            [f"#{h.number}", h.name, h.position, h.contact, h.power, h.fielding, h.speed]
-            for h in lineup(team)
-        ]
+        rows: list[list[Component | str | int | float | bool]] = []
+        for hitter in lineup(team):
+            hitter_row: list[Component | str | int | float | bool] = [
+                f"#{hitter.number}", hitter.name, hitter.position, hitter.contact,
+                hitter.power, hitter.fielding, hitter.speed,
+            ]
+            rows.append(hitter_row)
         starter = team.pitchers[0]
         content += [card(
             Header(f"{names[team_number]}'s team", 2, style_margin_top="0"),
@@ -2217,15 +2220,23 @@ def game_over(state: State) -> Page:
 
     star = player_of_the_game(state)
     innings = len(state.away_line)
-    home_runs = [str(r) for r in state.home_line]
-    if state.home_skipped_last:
-        home_runs[-1] = "X"
     header = ["Team"] + [str(i + 1) for i in range(innings)] + ["R", "H"]
-    rows: list[list[Component | str | int | float | bool]] = [
-        [state.away_name] + [str(r) for r in state.away_line]
-        + [state.away_score, state.away_hits],
-        [state.home_name] + home_runs + [state.home_score, state.home_hits],
-    ]
+
+    # Each row is declared with the exact type that Table expects, so the type checker
+    # does not have to guess (it would otherwise infer list[int | str]).
+    away_row: list[Component | str | int | float | bool] = [state.away_name]
+    home_row: list[Component | str | int | float | bool] = [state.home_name]
+    for inning_index in range(innings):
+        away_row.append(str(state.away_line[inning_index]))
+        if state.home_skipped_last and inning_index == innings - 1:
+            home_row.append("X")  # the home team did not need to bat
+        else:
+            home_row.append(str(state.home_line[inning_index]))
+    away_row.append(state.away_score)
+    away_row.append(state.away_hits)
+    home_row.append(state.home_score)
+    home_row.append(state.home_hits)
+    rows: list[list[Component | str | int | float | bool]] = [away_row, home_row]
     content += [
         card(Div(f"{state.away_name} {state.away_score}  -  {state.home_score} {state.home_name}",
                  style_font_size="1.8rem", style_font_weight="bold", style_text_align="center")),
@@ -2298,7 +2309,9 @@ _nb_state = State(away_batter=0, top_of_inning=True)
 next_batter(_nb_state)
 assert_equal(_nb_state.away_batter, 1)
 
-assert_equal(team_defense(_test_team), sum([h.fielding for h in lineup(_test_team)] + [_test_team.pitchers[0].fielding]) / 9)
+assert_equal(team_defense(_test_team),
+             sum([h.fielding for h in lineup(_test_team)]
+                 + [_test_team.pitchers[0].fielding]) / 9)
 assert_equal(stat_line(_test_hitter), "No at-bats yet today")
 
 _ar_state = State(top_of_inning=True, away_score=0, away_line=[0])
@@ -2452,7 +2465,10 @@ attempt_steal(_ast_state2, 0)
 assert_equal(_ast_state2.bases[0], EMPTY)
 
 assert_equal(pitcher_status(_test_pitcher), "fresh")
-assert_equal(pitcher_label(1, _test_pitcher), f"Reliever 1: {_test_pitcher.name} - VEL {_test_pitcher.velocity}, CTL {_test_pitcher.control}, MOV {_test_pitcher.movement}, STA {_test_pitcher.stamina}")
+assert_equal(pitcher_label(1, _test_pitcher),
+             f"Reliever 1: {_test_pitcher.name} - VEL {_test_pitcher.velocity}, "
+             f"CTL {_test_pitcher.control}, MOV {_test_pitcher.movement}, "
+             f"STA {_test_pitcher.stamina}")
 assert_equal(len(pitching_options(_test_team)), 4)
 
 assert_equal(type(banner("Test")), Div)
