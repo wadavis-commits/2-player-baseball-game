@@ -1503,7 +1503,7 @@ def banner(title: str, subtitle: str = "", color: str = GREEN, text_color: str =
     Returns:
         Div: Drafter Div component containing the banner.
     """
-    parts = [Header(title, 1, style_color=text_color, style_margin="0")]
+    parts: list[Component] = [Header(title, 1, style_color=text_color, style_margin="0")]
     if subtitle:
         parts.append(Div(subtitle, style_color=text_color, style_margin_top="4px"))
     return Div(*parts, style_background_color=color, style_padding="16px 22px",
@@ -1827,8 +1827,10 @@ def lineup_setup(state: State) -> Page:
     ]
     names = [state.away_name, state.home_name]
     for team_number, team in enumerate(state.teams):
-        rows = [[f"#{h.number}", h.name, h.position, h.contact, h.power, h.fielding, h.speed]
-                for h in lineup(team)]
+        rows: list[list[Component | str | int | float | bool]] = [
+            [f"#{h.number}", h.name, h.position, h.contact, h.power, h.fielding, h.speed]
+            for h in lineup(team)
+        ]
         starter = team.pitchers[0]
         content += [card(
             Header(f"{names[team_number]}'s team", 2, style_margin_top="0"),
@@ -2219,7 +2221,7 @@ def game_over(state: State) -> Page:
     if state.home_skipped_last:
         home_runs[-1] = "X"
     header = ["Team"] + [str(i + 1) for i in range(innings)] + ["R", "H"]
-    rows = [
+    rows: list[list[Component | str | int | float | bool]] = [
         [state.away_name] + [str(r) for r in state.away_line]
         + [state.away_score, state.away_hits],
         [state.home_name] + home_runs + [state.home_score, state.home_hits],
@@ -2494,4 +2496,3 @@ assert_equal(type(play_again(_test_state)), Page)
 
 if __name__ == "__main__":
     start_server(State())
-
