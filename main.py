@@ -31,7 +31,7 @@ set_site_information(
     description="Organize and execute a 2-player baseball game.",
     sources="Thank you to all of the University of Delaware CISC106 team, especially Proffesor Wassil.",
     planning=["plan.pdf", "design.pdf"],
-    links=["https://github.com/your-username/your-repository"]
+    links=["https://wadavis-commits.github.io/2-player-baseball-game/"]
 )
 hide_debug_information()
 set_website_framed(False)
